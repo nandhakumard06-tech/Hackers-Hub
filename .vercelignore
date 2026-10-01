@@ -1,0 +1,20 @@
+# ==========================================
+# VERCEL DEPLOYMENT IGNORE LIST
+# ==========================================
+
+# Exclude Local Admin App Completely
+admin-app/
+admin-app/**
+
+# Exclude local setup and maintenance scripts
+scripts/
+scripts/**
+
+# Exclude local caches, node_modules, and git
+.git/
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env.local
+.env.development.local

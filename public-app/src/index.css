@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: #000000;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff1a1a;
+}
+
+/* Cyber Utilities */
+.cyber-glow {
+  box-shadow: 0 0 15px rgba(255, 26, 26, 0.35);
+}
+
+.cyber-glow-hover:hover {
+  box-shadow: 0 0 20px rgba(255, 26, 26, 0.5);
+  border-color: #ff1a1a;
+}
+
+.cyber-glow-focus:focus {
+  box-shadow: 0 0 15px rgba(255, 26, 26, 0.4);
+  border-color: #ff1a1a;
+  outline: none;
+}
+
+.cyber-border-gradient {
+  border: 1px solid #2a2a2a;
+  transition: all 0.3s ease;
+}
+
+.cyber-border-gradient:hover {
+  border-color: #ff1a1a;
+}
+
+/* Red Scanline */
+.cyber-grid-bg {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.cyber-circuit-bg {
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(255, 26, 26, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(255, 26, 26, 0.04) 0%, transparent 40%);
+}
+
+/* Scanline Animation effect */
+.scanline-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Monospace cyber badge */
+.cyber-tag {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Corner clip path for futuristic hacker cards */
+.cyber-card-clip {
+  position: relative;
+}
+
+.cyber-card-clip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid #ff1a1a;
+  border-right: 2px solid #ff1a1a;
+  pointer-events: none;
+}
+
+.cyber-card-clip::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-bottom: 2px solid #ff1a1a;
+  border-left: 2px solid #ff1a1a;
+  pointer-events: none;
+}

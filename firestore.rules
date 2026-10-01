@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to verify if the user is an authenticated administrator
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'tvmhackershub@gmail.com' ||
+        request.auth.token.admin == true ||
+        request.auth.token.role == 'admin' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email != null && exists(/databases/$(database)/documents/admins/$(request.auth.token.email)))
+      );
+    }
+
+    // Registrations Collection
+    match /registrations/{registrationId} {
+      // Public users CANNOT read existing registrations. Only admins can read.
+      allow read: if isAdmin();
+
+      // Public users can ONLY CREATE a valid registration
+      allow create: if 
+        // Must contain required fields
+        request.resource.data.keys().hasAll(['name', 'email', 'mobile', 'hackingLevel', 'attendedWolfCTF', 'attendedWolfHackathons', 'createdAt']) &&
+        // Name string length validation
+        request.resource.data.name is string &&
+        request.resource.data.name.size() >= 2 &&
+        request.resource.data.name.size() <= 100 &&
+        // Email string validation
+        request.resource.data.email is string &&
+        request.resource.data.email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$') &&
+        // Mobile string validation
+        request.resource.data.mobile is string &&
+        request.resource.data.mobile.size() >= 10 &&
+        request.resource.data.mobile.size() <= 16 &&
+        // Ethical Hacking Level enum validation
+        request.resource.data.hackingLevel in ['basic', 'intermediate', 'advanced'] &&
+        // Yes/No enum validations
+        request.resource.data.attendedWolfCTF in ['yes', 'no'] &&
+        request.resource.data.attendedWolfHackathons in ['yes', 'no'];
+
+      // No public user can update or modify registrations
+      allow update: if false;
+
+      // Only authenticated admins can delete a registration
+      allow delete: if isAdmin();
+    }
+
+    // Admins Collection (Strictly protected)
+    match /admins/{adminId} {
+      allow read: if request.auth != null && (request.auth.uid == adminId || isAdmin());
+      allow write: if isAdmin();
+    }
+  }
+}

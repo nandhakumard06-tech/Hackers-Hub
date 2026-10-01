@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <path d="M50 5 L75 25 L88 55 L70 92 L50 78 L30 92 L12 55 L25 25 Z" fill="#080808" stroke="#FF1A1A" stroke-width="2.5" />
+  <path d="M50 18 L68 35 L78 60 L62 82 L50 72 L38 82 L22 60 L32 35 Z" fill="#111111" stroke="#FF1A1A" stroke-width="1.5" stroke-dasharray="2 2" />
+  <!-- Wolf Ears & Face Angles -->
+  <polygon points="50,22 60,40 50,48 40,40" fill="#FF1A1A" opacity="0.9" />
+  <polygon points="25,25 38,45 28,52" fill="#FFFFFF" opacity="0.9" />
+  <polygon points="75,25 62,45 72,52" fill="#FFFFFF" opacity="0.9" />
+  <!-- Glowing Red Eyes -->
+  <polygon points="36,48 44,52 38,55" fill="#FF1A1A" filter="drop-shadow(0 0 4px #FF1A1A)" />
+  <polygon points="64,48 56,52 62,55" fill="#FF1A1A" filter="drop-shadow(0 0 4px #FF1A1A)" />
+  <!-- Snout / Fang details -->
+  <polygon points="50,56 44,68 50,74 56,68" fill="#FFFFFF" />
+  <polygon points="50,68 47,74 53,74" fill="#FF1A1A" />
+</svg>
