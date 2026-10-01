@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies and Build
 node_modules
 dist
 dist-ssr
@@ -23,11 +24,19 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables & Secrets
 .env
 .env.production
 .env.local
-.env.example
+.env.development.local
 
 # Vercel
 .vercel
+
+# ==========================================
+# Admin-Related Files (Local PC Only)
+# ==========================================
+admin-app/
+admin-app/**
+scripts/
+scripts/**
