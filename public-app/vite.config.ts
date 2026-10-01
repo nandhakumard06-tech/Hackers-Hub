@@ -5,13 +5,17 @@ import nodemailer from 'nodemailer';
 
 dotenv.config();
 
-// Custom Vite plugin to handle /api/send-registration-email locally during development
-function localEmailApiPlugin(): Plugin {
+function getEmailDocId(email: string): string {
+  return email.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+// Custom Vite plugin to handle /api/register and /api/send-registration-email locally during development
+function localRegisterApiPlugin(): Plugin {
   return {
-    name: 'local-email-api',
+    name: 'local-register-api',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        if (req.url === '/api/send-registration-email' && req.method === 'POST') {
+        if ((req.url === '/api/register' || req.url === '/api/send-registration-email') && req.method === 'POST') {
           let body = '';
           req.on('data', (chunk) => {
             body += chunk;
@@ -20,7 +24,7 @@ function localEmailApiPlugin(): Plugin {
           req.on('end', async () => {
             try {
               const data = JSON.parse(body || '{}');
-              const { name, email, hackingLevel, attendedWolfCTF, attendedWolfHackathons } = data;
+              const { name, email, mobile, hackingLevel, attendedWolfCTF, attendedWolfHackathons, hackathonCount } = data;
 
               if (!name || !email) {
                 res.statusCode = 400;
@@ -28,6 +32,44 @@ function localEmailApiPlugin(): Plugin {
                 return res.end(JSON.stringify({ error: 'Missing required parameters (name, email).' }));
               }
 
+              const projectId = process.env.FIREBASE_PROJECT_ID || 'hacker-hub-720b0';
+              const apiKey = process.env.FIREBASE_API_KEY || '';
+              const docId = getEmailDocId(email);
+
+              // 1. Check duplicate in Firestore
+              const checkUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/registrations/${docId}${apiKey ? `?key=${apiKey}` : ''}`;
+              const checkRes = await fetch(checkUrl);
+              if (checkRes.status === 200) {
+                res.statusCode = 409;
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({ error: 'This email is already registered with TVM Hackers Hub.' }));
+              }
+
+              // 2. Save document to Firestore
+              const documentBody = {
+                fields: {
+                  name: { stringValue: name.trim() },
+                  email: { stringValue: email.trim().toLowerCase() },
+                  mobile: { stringValue: (mobile || '').trim() },
+                  hackingLevel: { stringValue: hackingLevel || 'basic' },
+                  attendedWolfCTF: { stringValue: attendedWolfCTF || 'no' },
+                  attendedWolfHackathons: { stringValue: attendedWolfHackathons || 'no' },
+                  hackathonCount: { stringValue: hackathonCount || '' },
+                  createdAt: { timestampValue: new Date().toISOString() }
+                }
+              };
+
+              const saveRes = await fetch(checkUrl, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(documentBody)
+              });
+
+              if (!saveRes.ok) {
+                console.warn('[Local Dev DB Note] Firestore REST save status:', saveRes.status);
+              }
+
+              // 3. Send confirmation email
               const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
               const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
               const smtpUser = process.env.SMTP_USER || 'tvmhackershub@gmail.com';
@@ -126,19 +168,23 @@ function localEmailApiPlugin(): Plugin {
               </html>
               `;
 
-              const info = await transporter.sendMail({
-                from: fromAddress,
-                to: email,
-                subject: 'Welcome to TVM Hacker Hub - Registration Confirmed',
-                html: htmlTemplate,
-              });
+              try {
+                const info = await transporter.sendMail({
+                  from: fromAddress,
+                  to: email,
+                  subject: 'Welcome to TVM Hacker Hub - Registration Confirmed',
+                  html: htmlTemplate,
+                });
+                console.log(`[Email Dispatch] Confirmation sent to ${email} (ID: ${info.messageId})`);
+              } catch (mailErr) {
+                console.error('[Email Dispatch Error (Non-Fatal)]', mailErr);
+              }
 
-              console.log(`[Email Dispatch] Confirmation sent to ${email} (ID: ${info.messageId})`);
               res.statusCode = 200;
               res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ success: true, messageId: info.messageId }));
+              res.end(JSON.stringify({ success: true, id: docId }));
             } catch (err: any) {
-              console.error('[Email Dispatch Error]', err);
+              console.error('[Local Register API Error]', err);
               res.statusCode = 500;
               res.setHeader('Content-Type', 'application/json');
               res.end(JSON.stringify({ error: err.message }));
@@ -153,7 +199,7 @@ function localEmailApiPlugin(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), localEmailApiPlugin()],
+  plugins: [react(), localRegisterApiPlugin()],
   server: {
     port: 5173,
     host: true,
